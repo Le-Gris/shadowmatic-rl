@@ -1,0 +1,48 @@
+{
+    "count": 1,
+    "self": 16.990792,
+    "total": 17.011093,
+    "children": {
+        "InitializeActuators": {
+            "count": 1,
+            "self": 0.0015249999999999999,
+            "total": 0.0015249999999999999,
+            "children": null
+        },
+        "InitializeSensors": {
+            "count": 1,
+            "self": 0.002649,
+            "total": 0.002649,
+            "children": null
+        },
+        "AgentSendState": {
+            "count": 804,
+            "self": 0.0080819999999999989,
+            "total": 0.0080819999999999989,
+            "children": null
+        },
+        "DecideAction": {
+            "count": 804,
+            "self": 0.0060989999999999994,
+            "total": 0.0060989999999999994,
+            "children": null
+        },
+        "AgentAct": {
+            "count": 804,
+            "self": 0.001513,
+            "total": 0.001513,
+            "children": null
+        }
+    },
+    "gauges": {},
+    "metadata": {
+        "timer_format_version": "0.1.0",
+        "start_time_seconds": "1715358430",
+        "unity_version": "2022.3.4f1",
+        "command_line_arguments": "\/Applications\/Unity\/Hub\/Editor\/2022.3.4f1\/Unity.app\/Contents\/MacOS\/Unity -projectpath \/Users\/solimlegris\/Projects\/shadowmatic-rl -useHub -hubIPC -cloudEnvironment production",
+        "communication_protocol_version": "1.5.0",
+        "com.unity.ml-agents_version": "3.0.0-exp.1",
+        "scene_name": "Shadowmatic",
+        "end_time_seconds": "1715358447"
+    }
+}
