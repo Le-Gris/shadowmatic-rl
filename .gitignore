@@ -25,6 +25,8 @@
 
 # Visual Studio cache directory
 .vs/
+.vscode/
+
 
 # Gradle cache directory
 .gradle/
@@ -71,7 +73,10 @@ crashlytics-build.properties
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
 
+# Ignore .DS_Store files
 *.DS_Store
+
+# Ignore some hidden stuff
 .venv/
 
 # Ignore results in assets folder
