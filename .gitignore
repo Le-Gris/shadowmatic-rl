@@ -73,3 +73,6 @@ crashlytics-build.properties
 
 *.DS_Store
 .venv/
+
+# Ignore results in assets folder
+/[Aa]ssets/[Rr]esults/
