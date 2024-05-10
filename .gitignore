@@ -80,4 +80,4 @@ crashlytics-build.properties
 .venv/
 
 # Ignore results in assets folder
-/[Aa]ssets/[Rr]esults/
+[Rr]esults/
