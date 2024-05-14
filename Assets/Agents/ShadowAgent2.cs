@@ -5,14 +5,16 @@ using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
 using System;
+using Unity.MLAgents.Policies;
 
 public class ShadowAgent2 : Agent
 {
     public GameObject[] shadowObjects;
     private GameObject currentObject;
     private Quaternion[] quaternions;
-    private int curIndex;
+    public int curIndex;
     EnvironmentParameters m_ResetParams;
+    StatsRecorder statsRecorder;
     void Start()
     {
         quaternions = new Quaternion[shadowObjects.Length];
@@ -22,9 +24,13 @@ public class ShadowAgent2 : Agent
             quaternions[i] = shadowObjTransform.rotation;
         }
 
-        m_ResetParams = Academy.Instance.EnvironmentParameters;
+        statsRecorder = Academy.Instance.StatsRecorder;
 
-        curIndex = (int)m_ResetParams.GetWithDefault("object", 0);
+        if (this.GetComponent<BehaviorParameters>().BehaviorType != BehaviorType.InferenceOnly)
+        {
+            m_ResetParams = Academy.Instance.EnvironmentParameters;
+            curIndex = (int)m_ResetParams.GetWithDefault("object", 0);
+        };
 
         for (int i = 0; i < shadowObjects.Length; i++)
         {
@@ -50,13 +56,7 @@ public class ShadowAgent2 : Agent
         randomOffset[0] = UnityEngine.Random.Range(-90, 90);
         randomOffset[1] = UnityEngine.Random.Range(-90, 90);
         randomOffset[2] = UnityEngine.Random.Range(-90, 90);
-        currentObject.transform.GetChild(0).localEulerAngles += randomOffset;
-    }
-
-    public override void CollectObservations(VectorSensor sensor)
-    {
-        Quaternion obs = currentObject.transform.GetChild(0).rotation;
-        sensor.AddObservation(obs);
+        currentObject.transform.GetChild(0).Rotate(randomOffset, Space.World);
     }
 
     public override void OnActionReceived(ActionBuffers actions)
@@ -68,30 +68,31 @@ public class ShadowAgent2 : Agent
         else if (action == 2) { rotation = Vector3.up; }
         else if (action == 3) { rotation = Vector3.down; }
         else if (action == 4) { rotation = Vector3.forward; }
-        else { rotation = Vector3.back; }
+        else if (action == 5) { rotation = Vector3.back; }
 
         Transform curObjTransform = currentObject.transform.GetChild(0);
-        curObjTransform.localEulerAngles += rotation;
+        curObjTransform.Rotate(rotation, Space.World);
         Transform target1 = currentObject.transform.GetChild(1);
         Transform target2 = currentObject.transform.GetChild(2);
         float distanceToTarget = DistanceToTarget(curObjTransform, target1, target2);
 
         if (distanceToTarget <= Math.PI / 64)
         {
-            double reward = 1 - distanceToTarget / (Math.PI / 16);
-            SetReward((float)reward);
+            double reward = 1 - distanceToTarget / (Math.PI / 8);
+            AddReward((float)reward);
+            statsRecorder.Add("Win", 1, StatAggregationMethod.Sum);
             EndEpisode();
         }
-        else if (distanceToTarget <= Math.PI / 16) // avoid rewarding too far from goal 
+        else if (distanceToTarget <= Math.PI / 8) // avoid rewarding too far from goal 
         {
-            double reward = 1 - distanceToTarget / (Math.PI / 16); // max of 0.98
-            SetReward((float)reward);
+            double reward = 1 - distanceToTarget / (Math.PI / 8); // max of 0.98
+            AddReward((float)reward);
         }
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)
     {
-        int action = 0;
+        int action = 6;
         var discreteActions = actionsOut.DiscreteActions;
         if (Input.GetKey(KeyCode.D)) // Right
         {

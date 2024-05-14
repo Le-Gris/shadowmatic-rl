@@ -5,13 +5,15 @@ using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using Unity.MLAgents.Actuators;
 using System;
+using Unity.MLAgents.Policies;
+using Unity.Sentis.Layers;
 
-public class ShadowAgent0 : Agent
+public class ShadowAgent4 : Agent
 {
     public GameObject[] shadowObjects;
     private GameObject currentObject;
     private Quaternion[] quaternions;
-    private int curIndex;
+    public int curIndex;
     EnvironmentParameters m_ResetParams;
     StatsRecorder statsRecorder;
     void Start()
@@ -23,13 +25,15 @@ public class ShadowAgent0 : Agent
             quaternions[i] = shadowObjTransform.rotation;
         }
 
+        statsRecorder = Academy.Instance.StatsRecorder;
         m_ResetParams = Academy.Instance.EnvironmentParameters;
 
-        statsRecorder = Academy.Instance.StatsRecorder;
+    }
 
-        curIndex = (int)m_ResetParams.GetWithDefault("object", 0);
-
-        // Set the currently selected object active and all the other ones inactive
+    public override void OnEpisodeBegin()
+    {
+        float lessonValue = m_ResetParams.GetWithDefault("object", 0.0f); // here we don't do curriculum learning, instead we just train on all levels randomly
+        curIndex = (int)Math.Floor(lessonValue);
         for (int i = 0; i < shadowObjects.Length; i++)
         {
             if (i == curIndex)
@@ -43,12 +47,9 @@ public class ShadowAgent0 : Agent
         }
 
         currentObject = shadowObjects[curIndex];
-    }
 
-    public override void OnEpisodeBegin()
-    {
-        Quaternion curObjInitRotation = quaternions[curIndex];
-        currentObject.GetComponentInChildren<ShadowObject>().ResetRotation(curObjInitRotation);
+        Quaternion curObjRotation = quaternions[curIndex];
+        currentObject.GetComponentInChildren<ShadowObject>().ResetRotation(curObjRotation);
         Vector3 randomOffset = Vector3.zero;
         randomOffset[0] = UnityEngine.Random.Range(-90, 90);
         randomOffset[1] = UnityEngine.Random.Range(-90, 90);
@@ -56,6 +57,11 @@ public class ShadowAgent0 : Agent
         currentObject.transform.GetChild(0).Rotate(randomOffset, Space.World);
     }
 
+    public override void CollectObservations(VectorSensor sensor)
+    {
+        Quaternion obs = currentObject.transform.GetChild(0).rotation;
+        sensor.AddObservation(obs);
+    }
 
     public override void OnActionReceived(ActionBuffers actions)
     {
@@ -68,6 +74,7 @@ public class ShadowAgent0 : Agent
         else if (action == 4) { rotation = Vector3.forward; }
         else if (action == 5) { rotation = Vector3.back; }
 
+
         Transform curObjTransform = currentObject.transform.GetChild(0);
         curObjTransform.Rotate(rotation, Space.World);
         Transform target1 = currentObject.transform.GetChild(1);
@@ -76,9 +83,15 @@ public class ShadowAgent0 : Agent
 
         if (distanceToTarget <= Math.PI / 64)
         {
-            SetReward(1);
+            double reward = 1 - distanceToTarget / (Math.PI / 8);
+            AddReward((float)reward);
             statsRecorder.Add("Win", 1, StatAggregationMethod.Sum);
             EndEpisode();
+        }
+        else if (distanceToTarget <= Math.PI / 8) // avoid rewarding too far from goal 
+        {
+            double reward = 1 - distanceToTarget / (Math.PI / 8); // max of 0.98
+            AddReward((float)reward);
         }
     }
 
