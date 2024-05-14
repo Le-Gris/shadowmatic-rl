@@ -1459,7 +1459,7 @@ PrefabInstance:
       objectReference: {fileID: 1969628502}
     - target: {fileID: 6628375045427704014, guid: 36a3ca41fb40844728426dad5b064fd1, type: 3}
       propertyPath: m_BehaviorName
-      value: ShadowAgent7Alt
+      value: ShadowAgent7Alt2
       objectReference: {fileID: 0}
     - target: {fileID: 7770675958659737621, guid: 36a3ca41fb40844728426dad5b064fd1, type: 3}
       propertyPath: m_Name
